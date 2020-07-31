@@ -1,11 +1,11 @@
-# -*- coding: utf-8 -*-
 """
 Created on Sun Jul 26 16:54:01 2020
 
-@author: Owner
+@author: BrianSun
+
+This is to scrape Rousseau's "On the Social Contract" from a website
 """
-# This is to scrape Rousseau's "On the Social Contract" from a website; requests imported to get html from website
-# BeautifulSoup needed to parse through the html
+
 from bs4 import BeautifulSoup
 import requests
 import os
@@ -19,34 +19,45 @@ url = 'https://oll.libertyfund.org/titles/rousseau-the-social-contract-and-disco
 html = requests.get(url).text
 soup = BeautifulSoup(html, "lxml")
 
-# initialize quotes list
 quotes = []
 
-# sort through all the text in the html:
+# These paragraph numbers outline the range of "On the Social Contract" <p> tags
+START_PARAGRAPH = 145
+END_PARAGRAPH = 588
+TWITTER_LIMIT = 280
+
+# Sort through all the text in the html:
 for text in soup.find_all('p'):
     try:
         paragraphNo = int(text.parent.p['id'][14:])
-        # only paragraphs 145-588 belong to "On the Social Contract", as id'ed in the <p> tags in the html
-        if paragraphNo < 145 or paragraphNo > 588:
+        
+        # Only grab paragraphs in "On the Social Contract"
+        if paragraphNo < START_PARAGRAPH or paragraphNo > END_PARAGRAPH:
             continue
+        
         elif text.string:
-            # ignore those "paragraphs" in the html that simply outline different chapters/books
-            if re.search('^CHAPTER(.*):', text.string) or re.search('^BOOK(.*):', text.string):
+            
+            # Ignore those "paragraphs" in the html that simply outline different chapters/books
+            if re.search('^(CHAPTER|BOOK)(.*):', text.string):
                 continue
+            
             else:
-                # want to read in the document by sentence (for RousseauBot to use individually later on)
-                tempList = re.split('(?!etc)\.\s|\!', text.string)
+                
+                # Want to read in the document by sentence (for RousseauBot to use individually later on)
+                tempList = re.split('(?<!etc)\.\s(?!.*\"$)|\!', text.string)
                 for sentence in tempList:
-                    # when a "paragraph" is just a single sentence, re's .split() returns the sentence and a ''
-                    #  remove these '' with .strip()
-                    # also, remove overly long quotes - Twitter has char limit
-                    if sentence != '' and len(sentence.strip()) < 280:
-                        quotes += [sentence.strip()]
+                    
+                    # When a "paragraph" is just a single sentence, re's .split() returns the sentence and a ''
+                    # Also, remove overly long quotes - Twitter has char limit
+                    if sentence != '' and len(sentence.strip()) < TWITTER_LIMIT:
+                        quotes.append(sentence.strip())
+    
     except KeyError:
+        
         # BS throws KeyError when <p>'s id field is blank; ignore - all paragraphs I need has an id
         continue
 
-# write into the corpus file
+# Write into the corpus file
 with open('corpus.txt', 'w') as file:
     for quote in quotes:
         file.write(quote + '\n')
