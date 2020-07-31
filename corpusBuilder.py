@@ -10,6 +10,7 @@ from bs4 import BeautifulSoup
 import requests
 import os
 import re
+import numpy as np
 
 # Set working directory to current folder; need to export sentences from the book into a txt later
 os.chdir(os.getcwd())
@@ -56,6 +57,9 @@ for text in soup.find_all('p'):
         
         # BS throws KeyError when <p>'s id field is blank; ignore - all paragraphs I need has an id
         continue
+
+# Shuffle the quotes array before export
+quotes = np.random.permutation(quotes)
 
 # Write into the corpus file
 with open('corpus.txt', 'w') as file:
