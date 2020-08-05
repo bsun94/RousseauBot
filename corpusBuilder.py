@@ -13,11 +13,12 @@ import re
 
 class RousseauScraper(object):
     
-    def __init__(self, startParagraph, endParagraph, twitterLimit, url):
-        self.startParagraph = startParagraph
-        self.endParagraph = endParagraph
-        self.twitterLimit = twitterLimit
-        self.url = url
+    START_PARAGRAPH = 145
+    END_PARAGRAPH = 588
+    TWITTER_LIMIT = 280
+    URL = 'https://oll.libertyfund.org/titles/rousseau-the-social-contract-and-discourses'
+    
+    def __init__(self):
         self.quotes = []
     
     # Set working directory to current folder; need to export sentences from the book into a txt later
@@ -26,7 +27,7 @@ class RousseauScraper(object):
     
     # Send a request to the website; get html and use BS to parse
     def getHTML(self):
-        html = requests.get(self.url).text
+        html = requests.get(self.URL).text
         soup = BeautifulSoup(html, "lxml")
         return soup
     
@@ -40,7 +41,7 @@ class RousseauScraper(object):
                 paragraphNo = int(text.parent.p['id'][14:])
                 
                 # Only grab paragraphs in "On the Social Contract"
-                if paragraphNo < self.startParagraph or paragraphNo > self.endParagraph:
+                if paragraphNo < self.START_PARAGRAPH or paragraphNo > self.END_PARAGRAPH:
                     continue
                 
                 elif text.string:
@@ -57,7 +58,7 @@ class RousseauScraper(object):
                             
                             # When a "paragraph" is just a single sentence, re's .split() returns the sentence and a ''
                             # Also, remove overly long quotes - Twitter has char limit
-                            if sentence != '' and len(sentence.strip()) < TWITTER_LIMIT:
+                            if sentence != '' and len(sentence.strip()) < self.TWITTER_LIMIT:
                                 self.quotes.append(sentence.strip())
                                 
             except KeyError:
@@ -76,12 +77,5 @@ class RousseauScraper(object):
         self.HTMLparser()
         self.corpusWriter()
 
-
-# Define user-editable constants to be passed into class object as method arguments, then run
-START_PARAGRAPH = 145
-END_PARAGRAPH = 588
-TWITTER_LIMIT = 280
-URL = 'https://oll.libertyfund.org/titles/rousseau-the-social-contract-and-discourses'
-
-corpus1 = RousseauScraper(START_PARAGRAPH, END_PARAGRAPH, TWITTER_LIMIT, URL)
+corpus1 = RousseauScraper()
 corpus1.runAll()
