@@ -11,7 +11,7 @@ import requests
 import os
 import re
 
-class RousseauScraper:
+class RousseauScraper(object):
     
     def __init__(self, startParagraph, endParagraph, twitterLimit, url):
         self.startParagraph = startParagraph

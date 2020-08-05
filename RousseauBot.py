@@ -14,7 +14,7 @@ import os
 import sys
 import json
 
-class RousseauTweets:
+class RousseauTweets(object):
     
     def __init__(self, credentialFile, corpusFile, previousTweets):
         self.credentialFile = credentialFile
