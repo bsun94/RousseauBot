@@ -13,26 +13,27 @@ import re
 
 class RousseauScraper(object):
     
+    URL             = 'https://oll.libertyfund.org/titles/rousseau-the-social-contract-and-discourses'
+    TWITTER_LIMIT   = 280
     START_PARAGRAPH = 145
-    END_PARAGRAPH = 588
-    TWITTER_LIMIT = 280
-    URL = 'https://oll.libertyfund.org/titles/rousseau-the-social-contract-and-discourses'
+    END_PARAGRAPH   = 588
+    os.chdir(os.getcwd())
     
     def __init__(self):
         self.quotes = []
     
-    # Set working directory to current folder; need to export sentences from the book into a txt later
-    def dirUpdater(self):
-        os.chdir(os.getcwd())
-    
-    # Send a request to the website; get html and use BS to parse
     def getHTML(self):
+        """
+        Send a request to the website; get html and use BS to parse.
+        """
         html = requests.get(self.URL).text
         soup = BeautifulSoup(html, "lxml")
         return soup
     
-    # Populates the object's quotes array
     def HTMLparser(self):
+        """
+        Populates the object's quotes array.
+        """
         soup = self.getHTML()
         
         # Sort through all the text in the html:
@@ -66,14 +67,15 @@ class RousseauScraper(object):
                 # BS throws KeyError when <p>'s id field is blank; ignore - all paragraphs I need has an id
                 continue
         
-    # Write into the corpus file
     def corpusWriter(self):
+        """
+        Write into the corpus file.
+        """
         with open('corpus.txt', 'w') as file:
             for quote in self.quotes:
                 file.write(quote + '\n')
     
     def runAll(self):
-        self.dirUpdater()
         self.HTMLparser()
         self.corpusWriter()
 
